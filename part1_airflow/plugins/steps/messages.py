@@ -1,7 +1,6 @@
 from airflow.providers.telegram.hooks.telegram import TelegramHook
 
 
-
 def send_telegram_success_message(context):
     hook = TelegramHook(telegram_conn_id="telegram_r6djo")
     dag = context["dag"].dag_id
