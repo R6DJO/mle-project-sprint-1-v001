@@ -4,4 +4,17 @@
 
 Полное описание проекта хранится в уроке «Проект. Разработка пайплайнов подготовки данных и обучения модели» на учебной платформе.
 
+Для предварительной настройки
+```
+mkdir -p ./dags ./logs ./plugins ./config
+echo -e "\nAIRFLOW_UID=$(id -u)" >> .env
+docker compose up airflow-init
+docker compose down --volumes --remove-orphans
+```
+
+Для запуска Airflow
+```
+docker compose up --build -d
+```
+
 Здесь укажите имя вашего бакета: s3-student-mle-20240502-bd92ebe8bb
