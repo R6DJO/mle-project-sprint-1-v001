@@ -162,3 +162,4 @@ cython_debug/
 *.csv
 nohup.out
 .python-version
+pyrightconfig.json
