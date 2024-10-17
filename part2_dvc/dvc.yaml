@@ -32,4 +32,3 @@ stages:
       - metrics
     outs:
       - cv_results/cv_res.json
-
