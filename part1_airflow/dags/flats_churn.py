@@ -8,11 +8,11 @@ from steps.messages import send_telegram_success_message, send_telegram_failure_
     schedule="@once",
     start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
     catchup=False,
-    tags=["ETL"],
+    tags=["Flats"],
     on_success_callback=send_telegram_success_message,
     on_failure_callback=send_telegram_failure_message,
 )
-def prepare_flats_dataset():
+def flats_get():
     import pandas as pd
     from airflow.providers.postgres.hooks.postgres import PostgresHook
 
@@ -22,37 +22,39 @@ def prepare_flats_dataset():
             MetaData,
             UniqueConstraint,
             Table,
+            BigInteger,
             Column,
             Integer,
             Float,
             Boolean,
         )
 
-        table_name = "clean_flats_churn"
+        table_name = "flats_churn"
         hook = PostgresHook("database")
         engine = hook.get_sqlalchemy_engine()
         metadata = MetaData()
         flats_table = Table(
             table_name,
             metadata,
-            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column("flat_id", Integer, primary_key=True, autoincrement=True),
             Column("floor", Integer),
-            Column("is_apartment", Boolean),
+            Column("apartment", Boolean),
             Column("kitchen_area", Float),
             Column("living_area", Float),
             Column("rooms", Integer),
+            Column("studio", Boolean),
             Column("total_area", Float),
-            Column("price", Integer),
-            Column("building_id", Integer),
+            Column("price", BigInteger),
+            Column("build_id", Integer),
             Column("build_year", Integer),
-            Column("building_type_int", Integer),
+            Column("build_type", Integer),
             Column("latitude", Float),
             Column("longitude", Float),
             Column("ceiling_height", Float),
             Column("flats_count", Integer),
             Column("floors_total", Integer),
             Column("has_elevator", Boolean),
-            UniqueConstraint("id", name="unique_flats_constraint"),
+            UniqueConstraint("flat_id", name="unique_all_flats_constraint"),
         )
 
         flats_table.drop(engine, checkfirst=True)
@@ -63,9 +65,9 @@ def prepare_flats_dataset():
         hook = PostgresHook("database")
         conn = hook.get_conn()
         sql = """
-        select f.id,f.floor,f.is_apartment,f.kitchen_area,f.living_area,f.rooms,
-        f.studio,f.total_area,f.price,f.building_id,
-        b.build_year,b.building_type_int,b.latitude,b.longitude,
+        select f.id flat_id,f.floor,f.is_apartment apartment,f.kitchen_area,f.living_area,f.rooms,
+        f.studio,f.total_area,f.price,f.building_id build_id,
+        b.build_year,b.building_type_int build_type,b.latitude,b.longitude,
         b.ceiling_height,b.flats_count,b.floors_total,b.has_elevator
         from flats as f
         join buildings as b on f.building_id=b.id
@@ -77,7 +79,7 @@ def prepare_flats_dataset():
     @task()
     def transform(data: pd.DataFrame):
         def remove_duplicates(data: pd.DataFrame):
-            feature_cols = data.columns.drop("id").tolist()
+            feature_cols = data.columns.tolist()
             is_duplicated_features = data.duplicated(subset=feature_cols, keep=False)
             data = pd.DataFrame(data[~is_duplicated_features].reset_index(drop=True))
             return data
@@ -111,7 +113,7 @@ def prepare_flats_dataset():
 
             return filtered_df
 
-        data = data.drop(columns="studio")
+        data = data.drop(columns=['id','studio','building_id'])
         data = remove_duplicates(data)
         data = remove_low_price_rows(data)
         data = remove_high_price_rows(data)
@@ -122,17 +124,17 @@ def prepare_flats_dataset():
     def load(data: pd.DataFrame):
         hook = PostgresHook("database")
         hook.insert_rows(
-            table="clean_flats_churn",
-            replace=True,
+            table="flats_churn",
+            # replace=True,
             target_fields=data.columns.tolist(),
-            replace_index=["id"],
+            # replace_index=["flat_id"],
             rows=data.values.tolist(),
         )
 
     create_table()
     extracted_data = extract()
-    transformed_data = transform(extracted_data)
-    load(transformed_data)
+    # transformed_data = transform(extracted_data)
+    load(extracted_data)
 
 
-prepare_flats_dataset()
+flats_get()
