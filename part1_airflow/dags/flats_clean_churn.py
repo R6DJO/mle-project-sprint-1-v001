@@ -36,16 +36,15 @@ def flats_clean_dataset():
         flats_table = Table(
             table_name,
             metadata,
-            Column("flat_id", Integer, primary_key=True, autoincrement=True),
+            Column("id", Integer, primary_key=True, autoincrement=True),
             Column("floor", Integer),
-            Column("apartment", Boolean),
+            Column("apartment", Integer),
             Column("kitchen_area", Float),
             Column("living_area", Float),
             Column("rooms", Integer),
-            Column("studio", Boolean),
+            Column("studio", Integer),
             Column("total_area", Float),
             Column("price", BigInteger),
-            Column("build_id", Integer),
             Column("build_year", Integer),
             Column("build_type", Integer),
             Column("latitude", Float),
@@ -53,7 +52,7 @@ def flats_clean_dataset():
             Column("ceiling_height", Float),
             Column("flats_count", Integer),
             Column("floors_total", Integer),
-            Column("has_elevator", Boolean),
+            Column("has_elevator", Integer),
             UniqueConstraint("id", name="unique_cleaned_flats_constraint"),
         )
 
@@ -77,6 +76,12 @@ def flats_clean_dataset():
 
     @task()
     def transform(data: pd.DataFrame):
+        def bool_to_int(data: pd.DataFrame):
+            data[data.select_dtypes(include="bool").columns] = data.select_dtypes(
+                include="bool"
+            ).astype(int)
+            return data
+
         def remove_duplicates(data: pd.DataFrame):
             feature_cols = data.columns.tolist()
             is_duplicated_features = data.duplicated(subset=feature_cols, keep=False)
@@ -84,12 +89,12 @@ def flats_clean_dataset():
             return data
 
         def remove_low_price_rows(data: pd.DataFrame):
-            '''Удаляем квартиры с явно неверной ценой менее 999'999'''
-            data = pd.DataFrame(data[data["price"] > 999999])
+            """Удаляем квартиры с явно неверной ценой менее 99'999"""
+            data = pd.DataFrame(data[data["price"] > 99999])
             return data
 
         def remove_high_price_rows(data: pd.DataFrame) -> pd.DataFrame:
-            '''Удаляем квартиры с ценой более 1'000'000'000'''
+            """Удаляем квартиры с ценой более 1'000'000'000"""
             data = pd.DataFrame(data[data["price"] < 1000000000])
             return data
 
@@ -114,11 +119,12 @@ def flats_clean_dataset():
 
             return filtered_df
 
-        data = data.drop(columns=['flat_id','build_id'])
+        data = data.drop(columns=["flat_id", "build_id"])
         data = remove_duplicates(data)
         data = remove_low_price_rows(data)
         # data = remove_high_price_rows(data)
         data = remove_outliers_iqr(data)
+        data = bool_to_int(data)
         return data
 
     @task()

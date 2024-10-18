@@ -113,7 +113,7 @@ def flats_get():
 
             return filtered_df
 
-        data = data.drop(columns=['id','studio','building_id'])
+        data = data.drop(columns=["id", "studio", "building_id"])
         data = remove_duplicates(data)
         data = remove_low_price_rows(data)
         data = remove_high_price_rows(data)
