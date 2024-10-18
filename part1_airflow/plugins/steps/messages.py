@@ -7,6 +7,7 @@ def send_telegram_success_message(context):
     run_id = context["run_id"]
 
     message = f"Успешно!\nDAG {dag}\nid={run_id}"
+
     hook.send_message({"text": message})
 
 

@@ -17,4 +17,5 @@ docker compose down --volumes --remove-orphans
 docker compose up --build -d
 ```
 
+=======
 Здесь укажите имя вашего бакета: s3-student-mle-20240502-bd92ebe8bb
