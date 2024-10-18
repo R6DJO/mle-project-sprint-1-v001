@@ -163,3 +163,4 @@ cython_debug/
 nohup.out
 .python-version
 pyrightconfig.json
+part1_airflow/notebooks/catboost_info/*
