@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.model_selection import KFold, cross_validate
 import joblib
 import json
 import yaml
@@ -13,12 +13,12 @@ def evaluate_model():
     with open(model_path, "rb") as fd:
         loaded_model = joblib.load(fd)
     data = pd.read_csv("data/initial_data.csv")
-
-    cv_strategy = StratifiedKFold(n_splits=params["n_splits"])
+    target = data[params["target_col"]]
+    cv_strategy = KFold(n_splits=params["n_splits"])
     cv_res = cross_validate(
         loaded_model,
         data,
-        data[params["target_col"]],
+        target,
         cv=cv_strategy,
         n_jobs=params["n_jobs"],
         scoring=params["metrics"],

@@ -1,0 +1,63 @@
+schema: '2.0'
+stages:
+  get_data:
+    cmd: python scripts/data.py
+    deps:
+    - path: scripts/data.py
+      hash: md5
+      md5: 7d4d703d6b679aae8c5ed429827f6609
+      size: 962
+    params:
+      params.yaml:
+        index_col: id
+    outs:
+    - path: data/initial_data.csv
+      hash: md5
+      md5: 468006806b7c4da4ec0c412336f07f9a
+      size: 11023374
+  fit_model:
+    cmd: python scripts/fit.py
+    deps:
+    - path: data/initial_data.csv
+      hash: md5
+      md5: 468006806b7c4da4ec0c412336f07f9a
+      size: 11023374
+    - path: scripts/fit.py
+      hash: md5
+      md5: 15590b6a42f52cf38149ef75374907cb
+      size: 1823
+    params:
+      params.yaml:
+        index_col: id
+        loss_function: RMSE
+        target_col: price
+    outs:
+    - path: models/fitted_model.pkl
+      hash: md5
+      md5: d65d25f844f45ea97e73a3e3c2d1cb22
+      size: 1123127
+  evaluate_model:
+    cmd: python scripts/evaluate.py
+    deps:
+    - path: models/fitted_model.pkl
+      hash: md5
+      md5: d65d25f844f45ea97e73a3e3c2d1cb22
+      size: 1123127
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: f539fbc145ee6d7b67d400e5d303f6b4
+      size: 986
+    params:
+      params.yaml:
+        index_col: id
+        metrics:
+        - r2
+        - neg_mean_squared_error
+        n_jobs: -1
+        n_splits: 5
+        target_col: price
+    outs:
+    - path: cv_results/cv_res.json
+      hash: md5
+      md5: 4e8e27b916165cd13559d926890e29ca
+      size: 128

@@ -1,7 +1,6 @@
 index_col: 'id'
-target_col: 'target'
-one_hot_drop: 'if_binary'
-auto_class_weights: 'Balanced'
+target_col: 'price'
+loss_function: 'RMSE'
 n_splits: 5
-metrics: ['f1', 'roc_auc']
+metrics: ['r2', 'neg_mean_squared_error']
 n_jobs: -1
