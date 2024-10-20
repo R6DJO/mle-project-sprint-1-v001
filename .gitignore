@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 
 *.csv
+nohup.out
+.python-version
+pyrightconfig.json
+part1_airflow/notebooks/catboost_info/*
