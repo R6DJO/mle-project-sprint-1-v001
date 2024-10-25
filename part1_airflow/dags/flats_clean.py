@@ -84,7 +84,7 @@ def flats_clean_dataset():
 
         def remove_duplicates(data: pd.DataFrame):
             feature_cols = data.columns.tolist()
-            is_duplicated_features = data.duplicated(subset=feature_cols, keep=False)
+            is_duplicated_features = data.duplicated(subset=feature_cols, keep='first')
             data = pd.DataFrame(data[~is_duplicated_features].reset_index(drop=True))
             return data
 

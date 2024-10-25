@@ -3,7 +3,6 @@
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from category_encoders import CatBoostEncoder
 from sklearn.preprocessing import StandardScaler
 from catboost import CatBoostRegressor
 import yaml
